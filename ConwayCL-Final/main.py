@@ -435,7 +435,7 @@ if __name__ == "__main__":
 	vetoConfig = False
 
 	#replay last config?
-	uinput = input("  > Use saved configuration? (Y/N): ")
+	uinput = ""#input("  > Use saved configuration? (Y/N): ")
 	if uinput != "" and uinput != "n" and uinput != "N":
 		# Override the defaults
 		res_expo            = int(config[0])
@@ -450,7 +450,7 @@ if __name__ == "__main__":
 
 
 	if(not vetoConfig):
-		uinput = input("  > (Int) [2 ^ " + str(res_expo) + " = " + str(2**res_expo) + "] Resolution: 2 to the power of: ")
+		uinput = ""#input("  > (Int) [2 ^ " + str(res_expo) + " = " + str(2**res_expo) + "] Resolution: 2 to the power of: ")
 		if uinput != "":
 			if int(uinput) < 16:
 				res_expo = int(uinput)
@@ -472,7 +472,7 @@ if __name__ == "__main__":
 
 	if(not vetoConfig):
 
-		usePreset = input("  > Use preset configuration? (Y/N): ")
+		usePreset = ""#input("  > Use preset configuration? (Y/N): ")
 		if usePreset == "N" or usePreset == "n":
 			#Query user about seeding the initial cell configurations
 			SeedType = input("  > Seed from bitmap file? (Y/N): ")
@@ -597,11 +597,13 @@ if __name__ == "__main__":
 
 		#Pygame Event Handler
 		for event in pygame.event.get():
+		
 			#print event.type
-			if event.type == QUIT:
+			if event.type == pygame.QUIT:
 				done = True
-			if event.type == 2:
-				if event.key == K_SPACE:
+			if event.type == pygame.KEYDOWN:
+				print(event.key)
+				if event.key == pygame.K_SPACE:
 					#MainCL.reseed()
 					if(show_ship):
 						shoot_now = True
@@ -637,11 +639,11 @@ if __name__ == "__main__":
 							ruleFName = MainCL.setKernel(fn)
 						else:
 							print("    file not found")
-			if event.type == KEYUP:
+			if event.type == pygame.KEYUP:
 				print(event.key)
-				if event.key == K_ESCAPE:
+				if event.key == pygame.K_ESCAPE:
 					done = True
-				if event.key == K_SPACE:
+				if event.key == pygame.K_SPACE:
 					shoot_now = False
 				if event.key == 116:
 					seed_bitmap_image = MainCL.gui_seedimage()
@@ -661,7 +663,7 @@ if __name__ == "__main__":
 					else:
 						bitmap_render = 1
 						print("Recording ON")
-				if event.key == 102:
+				if event.key == pygame.K_f:
 					use_filter = not use_filter
 				if event.key == 119:
 					ship_yv1 = 0
@@ -671,7 +673,7 @@ if __name__ == "__main__":
 					ship_xv1 = 0
 				if event.key == 97:
 					ship_xv2 = 0
-			if event.type == 5:
+			if event.type == pygame.MOUSEBUTTONUP:
 				if event.button == 4: #scrollup'
 					if(show_ship and use_filter):
 						if(bulletStatsAr[ship_scroll_weapon] < 256):
