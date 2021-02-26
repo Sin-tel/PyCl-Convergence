@@ -461,9 +461,10 @@ if __name__ == "__main__":
 	#Set the resolution
 	MainCL.initHostArrays(res_expo)
 
-	if(not vetoConfig):
+	#if(not vetoConfig):
 		#Have the user select one of the kernel automata rules
-		ruleFName = tfd.askopenfilename(initialdir="./RuleKernels", title="Select Kernel Rule (*.cl)")
+		#ruleFName = tfd.askopenfilename(initialdir="./RuleKernels", title="Select Kernel Rule (*.cl)")
+	ruleFName = "./RuleKernels/Count/WG-NoMod.cl"
 
 	#Load the selected kernel
 	print("  > LOADING KERNEL...")
@@ -566,31 +567,6 @@ if __name__ == "__main__":
 
 	use_filter = False
 
-	show_ship = False
-	shoot_now = False
-
-	bullet_x = 0
-	bullet_y = 0
-	bullet_life = 0
-	bullet_xv = 0
-	bullet_yv = 0
-
-	bullet_life_max = 24
-	bullet_size = 2
-	bullet_explosion = 24
-
-	bulletStatsAr = [bullet_life_max,bullet_size,bullet_explosion]
-
-	ship_scroll_weapon = 0
-
-	ship_size = 12
-	ship_x = (2**res_expo)/2
-	ship_y = (2**res_expo)/2
-	ship_xv1 = 0
-	ship_yv1 = 0
-	ship_xv2 = 0
-	ship_yv2 = 0
-
 	while done==False:
 
 		pygmouse = pygame.mouse.get_pos()
@@ -605,28 +581,8 @@ if __name__ == "__main__":
 				print(event.key)
 				if event.key == pygame.K_SPACE:
 					#MainCL.reseed()
-					if(show_ship):
-						shoot_now = True
-					else:
-						panNow = not panNow
-				if event.key == 119: # w
-					ship_yv1 = 2
-				if event.key == 97:  # a
-					ship_xv2 = 2
-				if event.key == 115: # s
-					ship_yv2 = 2
-				if event.key == 100: # d
-					ship_xv1 = 2
-				if event.key == 105: # i
-					show_ship = not show_ship
-					print("Ship:", show_ship)
-				if event.key == 264:
-					ship_scroll_weapon = 0
-				if event.key == 260:
-					ship_scroll_weapon = 1
-				if event.key == 262:
-					ship_scroll_weapon = 2
-				if event.key == 117: # u
+					panNow = not panNow
+				if event.key == pygame.K_u: # u
 					MainCL.saveSeedImage()
 				if event.key >= 48 and event.key <= 57: # the number keys (0 through 9)
 					index = (event.key - 49) % 10 # circularly rotate the indexes left by 1, causing the "1" keypress to be the first index and "0" to be the last index (just like the keyboard!)
@@ -645,18 +601,18 @@ if __name__ == "__main__":
 					done = True
 				if event.key == pygame.K_SPACE:
 					shoot_now = False
-				if event.key == 116:
+				if event.key == pygame.K_t:
 					seed_bitmap_image = MainCL.gui_seedimage()
-				if event.key == 112:
+				if event.key == pygame.K_p:
 					MainCL.reseed_zero()
 					#Get Int
 					#seed_strength = 256
 					#MainCL.reseed()
-				if event.key == 114:
+				if event.key == pygame.K_r:
 					MainCL.reseed()
-				if event.key == 101:
+				if event.key == pygame.K_e:
 					ruleFName = MainCL.gui_kernel_select()
-				if event.key == 113:
+				if event.key == pygame.K_q:
 					if bitmap_render != 0:
 						bitmap_render = 0
 						print("Recording off")
@@ -665,40 +621,20 @@ if __name__ == "__main__":
 						print("Recording ON")
 				if event.key == pygame.K_f:
 					use_filter = not use_filter
-				if event.key == 119:
-					ship_yv1 = 0
-				if event.key == 115:
-					ship_yv2 = 0
-				if event.key == 100:
-					ship_xv1 = 0
-				if event.key == 97:
-					ship_xv2 = 0
-			if event.type == pygame.MOUSEBUTTONUP:
+			if event.type == pygame.MOUSEBUTTONDOWN:
 				if event.button == 4: #scrollup'
-					if(show_ship and use_filter):
-						if(bulletStatsAr[ship_scroll_weapon] < 256):
-							bulletStatsAr[ship_scroll_weapon] += 1
+					if panNow:
+						myOrtho += -0.05 #zooom in
 					else:
-						if panNow:
-							myOrtho += -0.05 #zooom in
-						else:
-							brush_size += 1
+						brush_size += 1
 				if event.button == 5: #scrolldown
-					if(show_ship and use_filter):
-						if(bulletStatsAr[ship_scroll_weapon] > 0):
-							bulletStatsAr[ship_scroll_weapon] -= 1
+					if panNow:
+						myOrtho += 0.05 #zooom out
 					else:
-						if panNow:
-							myOrtho += 0.05 #zooom out
-						else:
-							if brush_size > 0:
-								brush_size -= 1
+						if brush_size > 0:
+							brush_size -= 1
 				if event.button == 1: #Left Click
-					#panNow = not panNow
-					if(show_ship):
-						shoot_now = True
-					else:
-						drawNow = True
+					drawNow = True
 					#MainCL.getData()
 				if event.button == 3: #Right Click
 					paused = not paused
@@ -710,7 +646,7 @@ if __name__ == "__main__":
 				if event.button == 8: #Back Mouse
 					seed_bitmap_image = MainCL.gui_seedimage()
 				#print event.button
-			if event.type == 6:
+			if event.type == pygame.MOUSEBUTTONUP:
 				if event.button == 1: #Release left
 					drawNow = False
 					#flipDrawNow = False
@@ -741,54 +677,15 @@ if __name__ == "__main__":
 		# Begin main program loop
 		#-----
 		if not paused:
-			"""bullet_x = 0
-			bullet_y = 0
-			bullet_life = 64
-			bullet_speed = 1
-			bullet_size = 5"""
-
-			if(show_ship and use_filter):
-				ship_x += ship_xv1;
-				ship_y -= ship_yv1;
-				ship_x -= ship_xv2;
-				ship_y += ship_yv2;
-				if(shoot_now and bullet_life == 0):
-					bullet_x = ship_x
-					bullet_y = ship_y
-					bullet_life = bulletStatsAr[0] + 11
-					bullet_size = bulletStatsAr[1]
-					bullet_explosion = bullet_size+bulletStatsAr[2]
-					bullet_exp_timer = bullet_life
-					#shoot_now = False
-
-					mx = ((float(pygmouse[0]) / GLR.SCREEN_SIZE[0])*(2**res_expo)) - (ship_size/2)
-					my = ((float(pygmouse[1]) / GLR.SCREEN_SIZE[0])*(2**res_expo)) - (ship_size/2)
-					bullet_xv = (ship_x - mx) / (bullet_life)
-					bullet_yv = (ship_y - my) / (bullet_life)
-				if(bullet_life > 0):
-					bullet_life -= 1
-					if(bullet_life % bullet_exp_timer == 0):
-						bullet_size = bullet_explosion
-					else:
-						bullet_size = bulletStatsAr[1]
-					bullet_x -= bullet_xv
-					bullet_y -= bullet_yv
-					MainCL.place_square_GPU(np.int32(bullet_x+((ship_size/2)-(bullet_size/2))), np.int32(bullet_y+((ship_size/2)-(bullet_size/2))), np.int32(bullet_size))
-					MainCL.place_square_filter_GPU(np.int32(bullet_x+((ship_size/2)-(bullet_size/2))), np.int32(bullet_y+((ship_size/2)-(bullet_size/2))), np.int32(bullet_size))
-
-				MainCL.place_square_filter_GPU(np.int32(ship_x), np.int32(ship_y), np.int32(ship_size))
-				#MainCL.getGameState()
-				#MainCL.gameAr
-
 			i += 1
 			#Run the CL
 			MainCL.execute()
 
 			######Build Every sub-frame
-			if use_filter and not show_ship:
-				MainCL.build_render()
+			#if use_filter and not show_ship:
+			#	MainCL.build_render()
 
-			if use_filter and show_ship:
+			if use_filter:
 				MainCL.build_render_no_blur()
 
 			#for every rendered CL frame

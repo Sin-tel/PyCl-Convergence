@@ -51,8 +51,6 @@ Open the terminal in './PyCl-Convergence/ConwayCL-Final'
 
 Run the Python script './PyCl-Convergence/ConwayCL-Final/main.py' in the terminal with: 'python main.py'
 
- * Spam the ENTER key to use default settings
-
  * Right Click to toggle pause
 
  * Click the scrollwheel or press 'R' key to restart/reseed world
@@ -88,6 +86,7 @@ VIEW
  * Scrollwheel to Zoom in or out
 
 GAME (Temporarily Default Override)
+I disabled all of this
 
  * 'I' to toggle use of 'Game Mode'
 
