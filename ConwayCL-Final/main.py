@@ -8,14 +8,15 @@ import datetime as date
 import time
 from PIL import Image
 import os
-import tkFileDialog as tfd
-from Tkinter import Tk
+import tkinter.filedialog as tfd
+from tkinter import Tk
 import pygame
 import OpenGL.GL as gl
 from pygame.locals import *
+import sys
 
 #Don't truncate printed arrays
-np.set_printoptions(threshold=np.nan)
+np.set_printoptions(threshold=sys.maxsize)
 
 """
 ###########################
@@ -213,21 +214,25 @@ class CL:
 	def getData(self):
 		if self.tickState == False:
 			self.kUtil.GetWorld(self.queue, self.a.shape, None, self.ar_ySize, self.a_buf, self.dest_buf)
-			cl.enqueue_read_buffer(self.queue, self.dest_buf, self.a).wait()
+			#cl.enqueue_read_buffer(self.queue, self.dest_buf, self.a).wait()
+			cl.enqueue_copy(self.queue, self.a, self.dest_buf)
 		else:
 			self.kUtil.GetWorld(self.queue, self.a.shape, None, self.ar_ySize, self.b_buf, self.dest_buf)
-			cl.enqueue_read_buffer(self.queue, self.dest_buf, self.a).wait()
+			#cl.enqueue_read_buffer(self.queue, self.dest_buf, self.a).wait()
+			cl.enqueue_copy(self.queue, self.a, self.dest_buf)
 
 
 	#Read from GPU buffer to host's array (self.a)
 	def getRenderData(self):
 			self.kUtil.GetWorld(self.queue, self.a.shape, None, self.ar_ySize, self.render_buf, self.dest_buf)
-			cl.enqueue_read_buffer(self.queue, self.dest_buf, self.a).wait()
+			#cl.enqueue_read_buffer(self.queue, self.dest_buf, self.a).wait()
+			cl.enqueue_copy(self.queue, self.a, self.dest_buf)
 
 	#Read from GPU buffer to host's array (self.a)
 	def getGameState(self):
 			self.kUtil.GetWorld(self.queue, self.a.shape, None, self.ar_ySize, self.render_buf, self.dest_buf)
-			cl.enqueue_read_buffer(self.queue, self.dest_buf, self.gameAr).wait()
+			#cl.enqueue_read_buffer(self.queue, self.dest_buf, self.gameAr).wait()
+			cl.enqueue_copy(self.queue, self.gameAr, self.dest_buf)
 
 
 	#Seed, fill buffer
@@ -263,7 +268,7 @@ class CL:
 
 	#Print the output array
 	def render(self):
-		print self.a
+		print(self.a)
 
 	def saveSeedImage(self):
 		sp.misc.imsave('SeedImage.bmp', sp.ndimage.zoom(np.where(MainCL.a!=0, 255, 0), 1, order=0))
@@ -331,34 +336,34 @@ class CL:
 			MainCL.loadImg(seed_bitmap_image)
 		else:
 			MainCL.seed(seed_strength)
-		print "  > LOADING KERNEL..."
+		print("  > LOADING KERNEL...")
 		MainCL.kAutomata = MainCL.loadProgram(ruleFName)
-		print "  > Done!"
+		print("  > Done!")
 		MainCL.initBuffers()
 		#self.offset = 2**22
 
 	#Reload kernel and return empty world
 	def reseed_zero(self):
 		MainCL.zeroWorld()
-		print "  > LOADING KERNEL..."
+		print("  > LOADING KERNEL...")
 		MainCL.kAutomata = MainCL.loadProgram(ruleFName)
-		print "  > Done!"
+		print("  > Done!")
 		MainCL.initBuffers()
 
 	#Prompt user to select a rule
 	def gui_kernel_select(self):
 		ruleFName = tfd.askopenfilename(initialdir="./RuleKernels", title="Select Kernel Rule (*.cl)")
-		print "  > LOADING KERNEL..."
+		print("  > LOADING KERNEL...")
 		MainCL.kAutomata = MainCL.loadProgram(ruleFName)
-		print "  > Done!"
+		print("  > Done!")
 		MainCL.initBuffers()
 		return ruleFName
 
 	#Hotkey Set Rule
 	def setKernel(self, rulename):
-		print "  > LOADING KERNEL..."
+		print("  > LOADING KERNEL...")
 		MainCL.kAutomata = MainCL.loadProgram(rulename)
-		print "  > Done!"
+		print("  > Done!")
 		MainCL.initBuffers()
 		return rulename
 
@@ -430,7 +435,7 @@ if __name__ == "__main__":
 	vetoConfig = False
 
 	#replay last config?
-	uinput = raw_input("  > Use saved configuration? (Y/N): ")
+	uinput = input("  > Use saved configuration? (Y/N): ")
 	if uinput != "" and uinput != "n" and uinput != "N":
 		# Override the defaults
 		res_expo            = int(config[0])
@@ -445,12 +450,12 @@ if __name__ == "__main__":
 
 
 	if(not vetoConfig):
-		uinput = raw_input("  > (Int) [2 ^ " + str(res_expo) + " = " + str(2**res_expo) + "] Resolution: 2 to the power of: ")
+		uinput = input("  > (Int) [2 ^ " + str(res_expo) + " = " + str(2**res_expo) + "] Resolution: 2 to the power of: ")
 		if uinput != "":
 			if int(uinput) < 16:
 				res_expo = int(uinput)
 			else:
-				print "2 ^", int(uinput), "resolution is too large. 2^16 = ", 2**16, "x", 2**16, "pixels. You may disable this limit manually, just above this message in main.py"
+				print("2 ^", int(uinput), "resolution is too large. 2^16 = ", 2**16, "x", 2**16, "pixels. You may disable this limit manually, just above this message in main.py")
 				res_expo = 9
 
 	#Set the resolution
@@ -461,40 +466,40 @@ if __name__ == "__main__":
 		ruleFName = tfd.askopenfilename(initialdir="./RuleKernels", title="Select Kernel Rule (*.cl)")
 
 	#Load the selected kernel
-	print "  > LOADING KERNEL..."
+	print("  > LOADING KERNEL...")
 	MainCL.kAutomata = MainCL.loadProgram(ruleFName)
-	print "  > Done!"
+	print("  > Done!")
 
 	if(not vetoConfig):
 
-		usePreset = raw_input("  > Use preset configuration? (Y/N): ")
+		usePreset = input("  > Use preset configuration? (Y/N): ")
 		if usePreset == "N" or usePreset == "n":
 			#Query user about seeding the initial cell configurations
-			SeedType = raw_input("  > Seed from bitmap file? (Y/N): ")
+			SeedType = input("  > Seed from bitmap file? (Y/N): ")
 			if SeedType != "" and SeedType != "n" and SeedType != "N":
 				#Seed from image
 				seed_bitmap_image = tfd.askopenfilename(initialdir="./SeedImages", title="Select Seeding-Image File (*.bmp)")
 				MainCL.loadImg(seed_bitmap_image)
 			else:
 				#Seed Strength
-				uinput = raw_input("  > (Int) [" + str(seed_strength) + "] Enter random seed strength (1/x): ")
+				uinput = input("  > (Int) [" + str(seed_strength) + "] Enter random seed strength (1/x): ")
 				if uinput != "":
 					seed_strength = int(uinput)
 
 			#render every x frames
-			uinput = raw_input("  > (Int) [" + str(renderEvery) + "] Render every x frames: ")
+			uinput = input("  > (Int) [" + str(renderEvery) + "] Render every x frames: ")
 			if uinput != "":
 				renderEvery = int(uinput)
 
-			uinput = raw_input("  > Render as bitmap files? (Y/N): ")
+			uinput = input("  > Render as bitmap files? (Y/N): ")
 			if uinput != "" and uinput != "n" and uinput != "N":
 				bitmap_render = 1
 
-			uinput = raw_input("  > (Int) [" + str(image_magnification) + "] Magnify rendered bitmap pixels by: ")
+			uinput = input("  > (Int) [" + str(image_magnification) + "] Magnify rendered bitmap pixels by: ")
 			if uinput != "":
 				image_magnification = int(uinput)
 
-			uinput = raw_input("  > Save configuration? (Y/N): ")
+			uinput = input("  > Save configuration? (Y/N): ")
 			if uinput != "" and uinput != "n" and uinput != "N":
 
 				#Save presets
@@ -529,7 +534,7 @@ if __name__ == "__main__":
 	# Begin main program loop
 	#-----
 
-	print "  > Begin OpenGL render"
+	print("  > Begin OpenGL render")
 
 	GLR = RenderGL(MainCL, SCR_DIMS)
 	pygame.init()
@@ -612,7 +617,7 @@ if __name__ == "__main__":
 					ship_xv1 = 2
 				if event.key == 105: # i
 					show_ship = not show_ship
-					print "Ship:", show_ship
+					print("Ship:", show_ship)
 				if event.key == 264:
 					ship_scroll_weapon = 0
 				if event.key == 260:
@@ -624,16 +629,16 @@ if __name__ == "__main__":
 				if event.key >= 48 and event.key <= 57: # the number keys (0 through 9)
 					index = (event.key - 49) % 10 # circularly rotate the indexes left by 1, causing the "1" keypress to be the first index and "0" to be the last index (just like the keyboard!)
 					if index >= len(playlist):
-						print "no playlist entry"
+						print("no playlist entry")
 					else:
 						fn = playlist[index]
-						print fn
+						print(fn)
 						if os.path.exists(fn):
 							ruleFName = MainCL.setKernel(fn)
 						else:
-							print "    file not found"
+							print("    file not found")
 			if event.type == KEYUP:
-				print event.key
+				print(event.key)
 				if event.key == K_ESCAPE:
 					done = True
 				if event.key == K_SPACE:
@@ -652,10 +657,10 @@ if __name__ == "__main__":
 				if event.key == 113:
 					if bitmap_render != 0:
 						bitmap_render = 0
-						print "Recording off"
+						print("Recording off")
 					else:
 						bitmap_render = 1
-						print "Recording ON"
+						print("Recording ON")
 				if event.key == 102:
 					use_filter = not use_filter
 				if event.key == 119:
