@@ -6,6 +6,8 @@ Python/OpenCl Cellular Automata explorer
 I encourage anyone who is willing to contribute to this code do so:
 	Fork the Github repository and upload your successive changes!
 
+Updated to work with python 3.8
+
 ### Dependencies:
 
  * sudo apt-get install python-pyopencl
